@@ -10,7 +10,7 @@ enum Action {
 }
 
 fn main() {
-    let (maybe_arg1, args) = util::consume_appimage_arg(std::env::args_os().skip(1).collect());
+    let (maybe_arg1, args) = util::consume_appimage_arg(&std::env::args_os().skip(1).collect());
     let action = match maybe_arg1 {
         None => Action::MountAndRun,
         Some(arg1) => match arg1.to_string_lossy().into_owned().as_str() {
