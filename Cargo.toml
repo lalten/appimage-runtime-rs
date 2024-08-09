@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+
+[package]
+name = "runtime"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "runtime"
+
+[dependencies]
+appimage-runtime = { path = "appimage-runtime" }
+appimage-mount = { path = "appimage-mount" }
+exec = "0.3.1"
+
+[dev-dependencies]
+backhand = "0.18.0"
+tempfile = "3.12.0"

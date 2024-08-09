@@ -1,0 +1,10 @@
+{
+    "rust-analyzer.cargo.extraEnv": {
+        "COMPILE_DATA_PATH": "../../bazel-bin/external/squashfuse~/ll_main",
+        "RULES_RUST_RUNFILES_WORKSPACE_NAME": "_main"
+    },
+    "rust-analyzer.runnables.extraEnv": {
+        "COMPILE_DATA_PATH": "../../bazel-bin/external/squashfuse~/ll_main",
+        "RULES_RUST_RUNFILES_WORKSPACE_NAME": "_main"
+    }
+}
