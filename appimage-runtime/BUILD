@@ -8,7 +8,10 @@ rust_library(
         "src/util.rs",
     ],
     visibility = ["//visibility:public"],
-    deps = ["@crates//:elf"],
+    deps = [
+        "@crates//:anyhow",
+        "@crates//:elf",
+    ],
 )
 
 rust_test_suite(

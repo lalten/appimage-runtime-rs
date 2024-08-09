@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+anyhow = "1.0.86"
 elf = "0.7.4"
 fork = "0.2.0"
 

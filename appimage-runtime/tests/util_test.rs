@@ -8,7 +8,7 @@ fn squashfuse_main_elf_size_is_binary_size() {
     let binary = runfiles::rlocation!(r, "squashfuse/ll_main");
     let file_size = binary.metadata().unwrap().len();
 
-    let elf_size = util::get_elf_size(&binary);
+    let elf_size = util::get_elf_size(&binary).unwrap();
 
     assert_eq!(file_size, elf_size);
 }

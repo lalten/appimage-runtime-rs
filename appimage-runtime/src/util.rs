@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use std::{ffi::OsString, vec::Vec};
 
 pub fn get_appimage_path() -> std::path::PathBuf {
@@ -12,15 +13,17 @@ pub fn get_appimage_path() -> std::path::PathBuf {
     }
 }
 
-pub fn get_elf_size(path: &std::path::PathBuf) -> u64 {
+pub fn get_elf_size(path: &std::path::PathBuf) -> Result<u64> {
     use elf::endian::AnyEndian;
     use elf::ElfStream;
-    let io = std::fs::File::open(path).expect(&format!("Failed to open file: {:?}", path));
-    let elf = ElfStream::<AnyEndian, _>::open_stream(io).expect("Open ElfStream");
+    let io = std::fs::File::open(path).with_context(|| format!("Opening elf {path:?}"))?;
+    let elf = ElfStream::<AnyEndian, _>::open_stream(io).context("Parsing elf")?;
     let sht_end = elf.ehdr.e_shoff + elf.ehdr.e_shentsize as u64 * elf.ehdr.e_shnum as u64;
-    let last_section = elf.segments().last().unwrap();
-    let last_section_end = last_section.p_offset + last_section.p_filesz;
-    std::cmp::max(sht_end, last_section_end)
+    let last_section_end = match elf.segments().last() {
+        Some(section) => section.p_offset + section.p_filesz,
+        None => 0,
+    };
+    Ok(std::cmp::max(sht_end, last_section_end))
 }
 
 pub fn print_help(argv0: &String) {
@@ -56,6 +59,30 @@ pub fn consume_appimage_arg(args: &Vec<OsString>) -> (Option<OsString>, Vec<OsSt
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn get_elf_size_devnull() {
+        let devnull = std::path::PathBuf::from("/dev/null");
+        let err = get_elf_size(&devnull).unwrap_err();
+        assert_eq!(format!("{err:#}"), "Parsing elf: Bad offset: 0x10");
+    }
+
+    #[test]
+    fn get_elf_size_nosuchfile() {
+        let devnull = std::path::PathBuf::from("/invalid");
+        let err = get_elf_size(&devnull).unwrap_err();
+        assert_eq!(
+            format!("{err:#}"),
+            "Opening elf \"/invalid\": No such file or directory (os error 2)"
+        );
+    }
+    
+    #[test]
+    fn get_elf_size_self() {
+        let devnull = std::path::PathBuf::from("/proc/self/exe");
+        let size = get_elf_size(&devnull).unwrap();
+        assert!(size > 0);
+    }
 
     #[test]
     fn consume_appimage_arg_empty() {
@@ -103,4 +130,5 @@ mod tests {
 
         assert!(arg1.is_none());
         assert_eq!(&args_out, &args_in.as_slice());
-    }}
+    }
+}

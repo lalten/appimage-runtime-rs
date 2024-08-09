@@ -35,7 +35,7 @@ fn main() {
     let appimage = &prog
         .read_link()
         .unwrap_or_else(|err| panic!("readlink failed on {prog:?}: {err}"));
-    let fs_offset = util::get_elf_size(&appimage);
+    let fs_offset = util::get_elf_size(&appimage).unwrap();
     if action == Action::Offset {
         println!("{fs_offset}");
         return;
