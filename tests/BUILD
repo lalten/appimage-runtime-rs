@@ -33,6 +33,20 @@ sh_test(
 )
 
 sh_test(
+    name = "magic_test",
+    timeout = "short",
+    srcs = ["magic_test.sh"],
+    data = [
+        "//:runtime",
+        "//:runtime_binary",
+    ],
+    env = {
+        "RUNTIME": "$(rootpath //:runtime)",
+        "RUNTIME_BIN": "$(rootpath //:runtime_binary)",
+    },
+)
+
+sh_test(
     name = "print_offset_test",
     timeout = "short",
     srcs = ["print_offset_test.sh"],
