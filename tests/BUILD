@@ -8,7 +8,8 @@ genrule(
         "env | sort",
         "EOF",
         "chmod +x AppRun",
-        "$(execpath @squashfs-tools//:mksquashfs) AppRun $@",
+        "$(execpath @squashfs-tools//:mksquashfs) AppRun $@" +
+        " -quiet -no-progress -root-owned -noappend -comp zstd",
     ]),
     tools = ["@squashfs-tools//:mksquashfs"],
 )
