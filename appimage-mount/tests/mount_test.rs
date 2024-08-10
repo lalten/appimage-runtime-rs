@@ -25,7 +25,7 @@ fn squashfuse_mount_works() {
 
     let mountpoint = mount::squashfuse_mount(&path, offset).unwrap();
 
-    let content = std::fs::read_to_string(&mountpoint.join("mydir/myfile")).unwrap();
+    let content = std::fs::read_to_string(mountpoint.join("mydir/myfile")).unwrap();
     assert_eq!(content, "Hello World!");
 }
 
