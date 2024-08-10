@@ -10,6 +10,7 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = [
         "@crates//:anyhow",
+        "@crates//:backhand",
         "@crates//:elf",
     ],
 )
@@ -23,8 +24,14 @@ rust_test(
 rust_test_suite(
     name = "integration",
     timeout = "short",
-    srcs = ["tests/util_test.rs"],
-    data = ["@squashfuse//:ll_main"],
+    srcs = [
+        "tests/extract_test.rs",
+        "tests/util_test.rs",
+    ],
+    data = [
+        "//tests:test.sqfs",
+        "@squashfuse//:ll_main",
+    ],
     deps = [
         ":appimage-runtime",
         "@rules_rust//tools/runfiles",

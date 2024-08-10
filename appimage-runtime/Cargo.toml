@@ -6,6 +6,7 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.86"
+backhand = "0.18.0"
 elf = "0.7.4"
 fork = "0.2.0"
 

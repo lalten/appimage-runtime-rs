@@ -38,6 +38,7 @@ pub fn print_help(argv0: &String) {
     // println!("--appimage-extract-and-run      Extract content from embedded filesystem image and execute the AppRun");
     // println!("--appimage-extract [<pattern>]  Extract content from embedded filesystem image. If pattern is passed, only extract matching files");
     println!("--appimage-help   Print this help");
+    println!("--appimage-list   List content from embedded filesystem image");
     println!("--appimage-mount  Mount embedded filesystem image and print mount point. Stop with Ctrl-C.");
     println!("--appimage-offset Print byte offset to start of embedded filesystem image");
     println!();

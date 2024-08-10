@@ -12,6 +12,7 @@ genrule(
         " -quiet -no-progress -root-owned -noappend -comp zstd",
     ]),
     tools = ["@squashfs-tools//:mksquashfs"],
+    visibility = ["//:__subpackages__"],
 )
 
 genrule(
@@ -29,6 +30,14 @@ sh_test(
     name = "args_test",
     timeout = "short",
     srcs = ["args_test.sh"],
+    data = [":test.appimage"],
+    env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
+)
+
+sh_test(
+    name = "list",
+    timeout = "short",
+    srcs = ["list.sh"],
     data = [":test.appimage"],
     env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
 )

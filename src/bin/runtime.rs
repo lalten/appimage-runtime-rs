@@ -1,9 +1,11 @@
 use appimage_mount::mount;
+use appimage_runtime::extract;
 use appimage_runtime::util;
 
 #[derive(PartialEq)]
 enum Action {
     Help,
+    List,
     Mount,
     MountAndRun,
     Offset,
@@ -18,6 +20,7 @@ fn main() {
         Some(arg1) => match arg1.to_string_lossy().into_owned().as_str() {
             "--appimage-help" => Action::Help,
             "--appimage-mount" => Action::Mount,
+            "--appimage-list" => Action::List,
             "--appimage-offset" => Action::Offset,
             arg => panic!("Invalid --appimage- arg: {arg:?}. Try --appimage-help."),
         },
@@ -35,6 +38,13 @@ fn main() {
     let fs_offset = util::get_elf_size(appimage).unwrap();
     if action == Action::Offset {
         println!("{fs_offset}");
+        return;
+    }
+
+    if action == Action::List {
+        for file in extract::list_files(appimage, fs_offset).unwrap() {
+            println!("{}", file.to_string_lossy());
+        }
         return;
     }
 
