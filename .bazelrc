@@ -1,6 +1,7 @@
 common --color=yes
 
 test --test_output=errors
+test --test_verbose_timeout_warnings
 
 build --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
 build --output_groups=+clippy_checks

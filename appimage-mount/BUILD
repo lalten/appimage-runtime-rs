@@ -19,6 +19,7 @@ rust_library(
 
 rust_test(
     name = "unit",
+    timeout = "short",
     crate = ":appimage-mount",
     data = ["@squashfuse//:ll_main"],
 )

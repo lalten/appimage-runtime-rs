@@ -16,6 +16,7 @@ rust_library(
 
 rust_test(
     name = "unit",
+    timeout = "short",
     crate = ":appimage-runtime",
 )
 
