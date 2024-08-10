@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test_suite")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test", "rust_test_suite")
 
 rust_library(
     name = "appimage-mount",
@@ -15,6 +15,12 @@ rust_library(
         "@crates//:selecting",
         "@crates//:tempfile",
     ],
+)
+
+rust_test(
+    name = "unit",
+    crate = ":appimage-mount",
+    data = ["@squashfuse//:ll_main"],
 )
 
 rust_test_suite(

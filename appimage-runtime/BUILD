@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test_suite")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test", "rust_test_suite")
 
 rust_library(
     name = "appimage-runtime",
@@ -12,6 +12,11 @@ rust_library(
         "@crates//:anyhow",
         "@crates//:elf",
     ],
+)
+
+rust_test(
+    name = "unit",
+    crate = ":appimage-runtime",
 )
 
 rust_test_suite(
