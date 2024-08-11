@@ -27,23 +27,23 @@ pub fn get_elf_size(path: &std::path::PathBuf) -> Result<u64> {
 }
 
 pub fn print_help(argv0: &String) {
-    println!(
-        "appimage-runtime-rs: A type-2 AppImage runtime implementation in Rust, built with Bazel."
-    );
-    println!();
-    println!("Usage: {argv0} [OPTION] [ARG]...");
-    println!();
-    println!("Options listed here will be consumed by the runtime. All other options will be passed to the application.");
-    println!();
-    // println!("--appimage-extract-and-run      Extract content from embedded filesystem image and execute the AppRun");
-    // println!("--appimage-extract [<pattern>]  Extract content from embedded filesystem image. If pattern is passed, only extract matching files");
-    println!("--appimage-help   Print this help");
-    println!("--appimage-list   List content from embedded filesystem image");
-    println!("--appimage-mount  Mount embedded filesystem image and print mount point. Stop with Ctrl-C.");
-    println!("--appimage-offset Print byte offset to start of embedded filesystem image");
-    println!();
-    println!("It is an error to pass more than one of the above options.");
-    println!("It is an error to pass a --appimage-* option not listed above.");
+    println!("\
+appimage-runtime-rs: A type-2 AppImage runtime implementation in Rust, built with Bazel.
+
+Usage: {argv0} [OPTION] [ARG]...
+
+Options listed here will be consumed by the runtime. All other options will be passed to the application.
+
+--appimage-extract-and-run      Extract content from embedded filesystem image and execute the AppRun
+--appimage-extract [<pattern>]  Extract content from embedded filesystem image. If pattern is passed, only extract matching files
+--appimage-help                 Print this help
+--appimage-list                 List content from embedded filesystem image
+--appimage-mount                Mount embedded filesystem image and print mount point. Stop with Ctrl-C.
+--appimage-offset               Print byte offset to start of embedded filesystem image
+
+It is an error to pass more than one of the above options.
+It is an error to pass a --appimage-* option not listed above as the first argument.
+");
 }
 
 pub fn consume_appimage_arg(args: &[OsString]) -> (Option<OsString>, &[OsString]) {

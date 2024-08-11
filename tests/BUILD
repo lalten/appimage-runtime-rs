@@ -10,6 +10,7 @@ genrule(
         "chmod +x AppRun",
         "mkdir -p other/path",
         "echo 'I am data' > other/path/file.txt",
+        "export SOURCE_DATE_EPOCH=1424879120",
         "$(execpath @squashfs-tools//:mksquashfs) AppRun other/path/file.txt $@" +
         " -quiet -no-progress -no-strip -root-owned -noappend -comp zstd",
     ]),
@@ -32,6 +33,14 @@ sh_test(
     name = "args_test",
     timeout = "short",
     srcs = ["args_test.sh"],
+    data = [":test.appimage"],
+    env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
+)
+
+sh_test(
+    name = "extract_test",
+    timeout = "short",
+    srcs = ["extract_test.sh"],
     data = [":test.appimage"],
     env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
 )

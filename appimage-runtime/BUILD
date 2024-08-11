@@ -12,6 +12,7 @@ rust_library(
         "@crates//:anyhow",
         "@crates//:backhand",
         "@crates//:elf",
+        "@crates//:glob",
     ],
 )
 
