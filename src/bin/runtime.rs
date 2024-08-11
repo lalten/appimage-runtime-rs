@@ -2,10 +2,12 @@ use appimage_mount::mount;
 use appimage_runtime::extract;
 use appimage_runtime::util;
 use std::path::PathBuf;
+use std::thread;
 
 #[derive(PartialEq)]
 enum Action {
     Extract,
+    ExtractAndRun,
     Help,
     List,
     Mount,
@@ -25,6 +27,7 @@ fn main() {
         None => Action::MountAndRun,
         Some(arg1) => match arg1.to_string_lossy().into_owned().as_str() {
             "--appimage-extract" => Action::Extract,
+            "--appimage-extract-and-run" => Action::ExtractAndRun,
             "--appimage-help" => Action::Help,
             "--appimage-mount" => Action::Mount,
             "--appimage-list" => Action::List,
@@ -55,26 +58,42 @@ fn main() {
             }
             return;
         }
-        Action::Extract => {
-            let pattern = match args.first() {
-                Some(arg) => {
-                    let pattern = arg.to_string_lossy().into_owned();
-                    Some(glob::Pattern::new(pattern.as_str()).unwrap())
-                }
-                None => None,
-            };
-            let target = &cwd.join("squashfs-root");
-            extract::extract_files(appimage, fs_offset, pattern.as_ref(), target).unwrap();
-            return;
-        }
         _ => (),
     };
 
-    let appdir = mount::squashfuse_mount(appimage, fs_offset)
-        .unwrap_or_else(|err| panic!("Failed to mount {appimage:?} at offset {fs_offset}: {err}"));
-    if action == Action::Mount {
-        println!("{}", appdir.to_string_lossy());
-        return;
+    let pattern = match action {
+        Action::Extract => match args.first() {
+            Some(arg) => {
+                let pattern = arg.to_string_lossy().into_owned();
+                Some(glob::Pattern::new(pattern.as_str()).unwrap())
+            }
+            None => None,
+        },
+        _ => None,
+    };
+
+    let appdir = match action {
+        Action::Mount | Action::MountAndRun => mount::squashfuse_mount(appimage, fs_offset)
+            .unwrap_or_else(|err| {
+                panic!("Failed to mount {appimage:?} at offset {fs_offset}: {err}")
+            }),
+        Action::Extract | Action::ExtractAndRun => {
+            // TODO: make this a tempdir for extract-and-run
+            let target = &cwd.join("squashfs-root");
+            extract::extract_files(appimage, fs_offset, pattern.as_ref(), target).unwrap()
+        }
+        _ => unreachable!(),
+    };
+
+    match action {
+        Action::Mount => {
+            println!("{}", appdir.to_string_lossy());
+            loop {
+                thread::park();
+            }
+        }
+        Action::Extract => return,
+        _ => (),
     }
 
     std::env::set_var("APPDIR", &appdir);

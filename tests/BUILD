@@ -46,6 +46,14 @@ sh_test(
 )
 
 sh_test(
+    name = "extract_and_run_test",
+    timeout = "short",
+    srcs = ["extract_and_run_test.sh"],
+    data = [":test.appimage"],
+    env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
+)
+
+sh_test(
     name = "list_test",
     timeout = "short",
     srcs = ["list_test.sh"],
@@ -68,6 +76,24 @@ sh_test(
 )
 
 sh_test(
+    name = "mount_test",
+    timeout = "short",
+    srcs = ["mount_test.sh"],
+    data = [":test.appimage"],
+    env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
+    tags = ["requires-fakeroot"],
+)
+
+sh_test(
+    name = "mount_and_run_test",
+    timeout = "short",
+    srcs = ["mount_and_run_test.sh"],
+    data = [":test.appimage"],
+    env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
+    tags = ["requires-fakeroot"],
+)
+
+sh_test(
     name = "print_offset_test",
     timeout = "short",
     srcs = ["print_offset_test.sh"],
@@ -79,13 +105,4 @@ sh_test(
         "TEST_APPIMAGE": "$(rootpath :test.appimage)",
         "RUNTIME_PATH": "$(rootpath //:runtime)",
     },
-)
-
-sh_test(
-    name = "run_test",
-    timeout = "short",
-    srcs = ["run_test.sh"],
-    data = [":test.appimage"],
-    env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
-    tags = ["requires-fakeroot"],
 )

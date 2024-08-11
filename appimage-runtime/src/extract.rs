@@ -30,7 +30,7 @@ pub fn extract_files(
     fs_offset: u64,
     pattern: Option<&glob::Pattern>,
     target: &Path,
-) -> Result<()> {
+) -> Result<PathBuf> {
     let filesystem = make_filesystem_reader(appimage, fs_offset)?;
     for node in &filesystem.root.nodes {
         if let Some(p) = pattern {
@@ -68,5 +68,5 @@ pub fn extract_files(
         let perm = Permissions::from_mode(node.header.permissions.into());
         file.set_permissions(perm)?;
     }
-    Ok(())
+    Ok(target.to_path_buf())
 }
