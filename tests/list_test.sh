@@ -9,6 +9,9 @@ expected="$TEST_TMPDIR/expected"
 cat <<EOF > "$expected"
 /
 /AppRun
+/other
+/other/path
+/other/path/file.txt
 EOF
 
 diff -u "$expected" "$out"

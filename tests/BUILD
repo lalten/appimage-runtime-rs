@@ -8,8 +8,10 @@ genrule(
         "env | sort",
         "EOF",
         "chmod +x AppRun",
-        "$(execpath @squashfs-tools//:mksquashfs) AppRun $@" +
-        " -quiet -no-progress -root-owned -noappend -comp zstd",
+        "mkdir -p other/path",
+        "echo 'I am data' > other/path/file.txt",
+        "$(execpath @squashfs-tools//:mksquashfs) AppRun other/path/file.txt $@" +
+        " -quiet -no-progress -no-strip -root-owned -noappend -comp zstd",
     ]),
     tools = ["@squashfs-tools//:mksquashfs"],
     visibility = ["//:__subpackages__"],
@@ -35,9 +37,9 @@ sh_test(
 )
 
 sh_test(
-    name = "list",
+    name = "list_test",
     timeout = "short",
-    srcs = ["list.sh"],
+    srcs = ["list_test.sh"],
     data = [":test.appimage"],
     env = {"TEST_APPIMAGE": "$(rootpath :test.appimage)"},
 )
