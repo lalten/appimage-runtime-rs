@@ -20,5 +20,6 @@ rust_binary(
         "//appimage-mount",
         "//appimage-runtime",
         "@crates//:exec",
+        "@crates//:glob",
     ],
 )

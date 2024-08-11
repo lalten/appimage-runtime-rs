@@ -1,8 +1,7 @@
-use std::path::PathBuf;
-
 use appimage_mount::mount;
 use appimage_runtime::extract;
 use appimage_runtime::util;
+use std::path::PathBuf;
 
 #[derive(PartialEq)]
 enum Action {
@@ -57,8 +56,15 @@ fn main() {
             return;
         }
         Action::Extract => {
+            let pattern = match args.first() {
+                Some(arg) => {
+                    let pattern = arg.to_string_lossy().into_owned();
+                    Some(glob::Pattern::new(pattern.as_str()).unwrap())
+                }
+                None => None,
+            };
             let target = &cwd.join("squashfs-root");
-            extract::extract_files(appimage, fs_offset, None, target).unwrap();
+            extract::extract_files(appimage, fs_offset, pattern.as_ref(), target).unwrap();
             return;
         }
         _ => (),

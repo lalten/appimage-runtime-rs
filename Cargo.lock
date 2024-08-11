@@ -464,6 +464,7 @@ dependencies = [
  "appimage-runtime",
  "backhand",
  "exec",
+ "glob",
  "tempfile",
 ]
 

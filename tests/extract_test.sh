@@ -28,6 +28,11 @@ SOURCE_DATE_EPOCH=1424879120
 test "$(stat --format=%Y squashfs-root/AppRun)" == "$SOURCE_DATE_EPOCH"
 test "$(stat --format=%Y squashfs-root/other/path/file.txt)" == "$SOURCE_DATE_EPOCH"
 
-# TODO: Extract the AppImage contents again but with a pattern filter
+# Extract the AppImage contents with a pattern filter
 rm -rf squashfs-root
-"$TEST_APPIMAGE" --appimage-extract ""
+"$TEST_APPIMAGE" --appimage-extract "*.txt"
+test "$(find squashfs-root -type f)" == "squashfs-root/other/path/file.txt"
+
+rm -rf squashfs-root
+"$TEST_APPIMAGE" --appimage-extract "**/*Run"
+test "$(find squashfs-root -type f)" == "squashfs-root/AppRun"
