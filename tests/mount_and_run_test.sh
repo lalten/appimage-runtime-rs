@@ -10,3 +10,8 @@ grep -q "APPDIR=$TMPDIR/.mount_" "$out"
 grep -q "APPIMAGE=$(readlink -f "$TEST_APPIMAGE")" "$out"
 grep -q "ARGV0=$TEST_APPIMAGE" "$out"
 grep -q "OWD=$(pwd)" "$out"
+
+# Check that the mount point is gone after execution is finished
+test ! -d "$TMPDIR/.mount_"
+
+# TODO: check that we don't leave any squashfuse processes behind
