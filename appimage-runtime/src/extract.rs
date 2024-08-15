@@ -2,7 +2,7 @@ use anyhow::Result;
 use backhand;
 use std::fs::{File, Permissions};
 use std::os::unix::fs::PermissionsExt;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
 use glob;
@@ -25,12 +25,12 @@ pub fn list_files(appimage: &PathBuf, fs_offset: u64) -> Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-pub fn extract_files(
+pub fn extract_files<'a>(
     appimage: &PathBuf,
     fs_offset: u64,
     pattern: Option<&glob::Pattern>,
-    target: &Path,
-) -> Result<PathBuf> {
+    target: &'a PathBuf,
+) -> Result<&'a PathBuf> {
     let filesystem = make_filesystem_reader(appimage, fs_offset)?;
     for node in &filesystem.root.nodes {
         if let Some(p) = pattern {
@@ -68,5 +68,5 @@ pub fn extract_files(
         let perm = Permissions::from_mode(node.header.permissions.into());
         file.set_permissions(perm)?;
     }
-    Ok(target.to_path_buf())
+    Ok(target)
 }

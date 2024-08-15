@@ -22,8 +22,10 @@ fn squashfuse_mount_works() {
     let path = std::path::PathBuf::from(&squashfs.path());
     let offset = 1234;
     create_squashfs(&path, offset);
+    let tempdir = tempfile::tempdir().unwrap();
+    let mountpoint = &tempdir.path().to_path_buf();
 
-    let mountpoint = mount::squashfuse_mount(&path, offset).unwrap();
+    mount::squashfuse_mount(&path, offset, mountpoint).unwrap();
 
     let content = std::fs::read_to_string(mountpoint.join("mydir/myfile")).unwrap();
     assert_eq!(content, "Hello World!");
@@ -32,6 +34,8 @@ fn squashfuse_mount_works() {
 #[test]
 fn squashfuse_mount_fail() {
     let path = std::path::PathBuf::from("/dev/null");
-    let err = mount::squashfuse_mount(&path, 0).unwrap_err();
+    let tempdir = tempfile::tempdir().unwrap();
+    let mountpoint = &tempdir.path().to_path_buf();
+    let err = mount::squashfuse_mount(&path, 0, mountpoint).unwrap_err();
     assert!(err.to_string().contains("This doesn't look like a squashfs image."), "unexpected err: {}", err);
 }

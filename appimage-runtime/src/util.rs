@@ -1,20 +1,20 @@
 use anyhow::{Context, Result};
 use base62;
-use std::{ffi::OsString, hash::Hasher, io::Read};
+use std::{ffi::OsString, hash::Hasher, io::Read, path::PathBuf};
 
-pub fn get_appimage_path() -> std::path::PathBuf {
+pub fn get_appimage_path() -> PathBuf {
     let path = std::env::var("TARGET_APPIMAGE").unwrap_or("/proc/self/exe".to_string());
-    let prog = std::path::PathBuf::from(path);
+    let prog = PathBuf::from(path);
     match prog.is_relative() {
         true => {
             let bwd = std::env::var("BUILD_WORKING_DIRECTORY").unwrap_or(".".to_string());
-            std::path::PathBuf::from(bwd).join(prog)
+            PathBuf::from(bwd).join(prog)
         }
         false => prog,
     }
 }
 
-pub fn get_elf_size(path: &std::path::PathBuf) -> Result<u64> {
+pub fn get_elf_size(path: &PathBuf) -> Result<u64> {
     use elf::endian::AnyEndian;
     use elf::ElfStream;
     let io = std::fs::File::open(path).with_context(|| format!("Opening elf {path:?}"))?;
@@ -56,7 +56,7 @@ pub fn consume_appimage_arg(args: &[OsString]) -> (Option<OsString>, &[OsString]
     (None, args)
 }
 
-pub fn get_hash(path: &std::path::PathBuf) -> Result<String> {
+pub fn get_hash(path: &PathBuf) -> Result<String> {
     const BUFFER_LEN: usize = 1024 * 1024;
     let mut buffer = [0u8; 1024 * 1024];
 
@@ -72,6 +72,12 @@ pub fn get_hash(path: &std::path::PathBuf) -> Result<String> {
     }
 
     Ok(base62::encode(hasher.finish()))
+}
+
+pub fn make_hashed_tempdirname<S: Into<String>>(appimage: &PathBuf, prefix: S) -> Result<PathBuf> {
+    let hash = get_hash(appimage)?;
+    let tempdir = std::env::temp_dir();
+    Ok(tempdir.join(prefix.into() + &hash))
 }
 
 #[cfg(test)]
@@ -165,5 +171,13 @@ mod tests {
         tempfile.write_all(b"Hello, World!").unwrap();
         let hash = get_hash(&tempfile.path().to_path_buf()).unwrap();
         assert_eq!(hash, "40tfDDpk1nx");
+    }
+
+    #[test]
+    fn make_hashed_tempdirname_devnull() {
+        let devnull = std::path::PathBuf::from("/dev/null");
+        let tempdir = make_hashed_tempdirname(&devnull, "test_").unwrap();
+        assert_eq!(tempdir.to_string_lossy(), "/tmp/test_HGbCilcGWPh");
+        assert!(! tempdir.exists());
     }
 }

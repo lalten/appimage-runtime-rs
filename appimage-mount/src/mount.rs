@@ -1,12 +1,15 @@
 use anyhow::{bail, Result};
+use nix;
+use std::path::PathBuf;
 
 pub const SQUASHFUSE_DATA: &[u8] = include_bytes!(std::env!("COMPILE_DATA_PATH"));
 
-pub fn squashfuse_mount(
-    squashfs: &std::path::PathBuf,
+pub fn squashfuse_mount<'a>(
+    squashfs: &PathBuf,
     fs_offset: u64,
-) -> Result<std::path::PathBuf> {
-    let mountpoint = mkdtemp_mountpoint();
+    mountpoint: &'a PathBuf,
+) -> Result<&'a PathBuf> {
+    std::fs::create_dir_all(mountpoint)?;
 
     // prepare squashfuse notify pipe
     let pipe_tmpdir = tempfile::tempdir()?;
@@ -21,7 +24,7 @@ pub fn squashfuse_mount(
         .arg("-oauto_unmount")
         .arg("-otimeout=1")
         .arg(squashfs)
-        .arg(&mountpoint)
+        .arg(mountpoint)
         .stdout(memfd_exec::Stdio::piped())
         .stderr(memfd_exec::Stdio::piped());
     let prog = &squashfuse_exec.get_argv().clone();
@@ -51,29 +54,4 @@ pub fn squashfuse_mount(
 
     // squashfuse has daemonized at this point.
     Ok(mountpoint)
-}
-
-fn mkdtemp_mountpoint() -> std::path::PathBuf {
-    let template = std::ffi::CString::new("/tmp/.mount_XXXXXX")
-        .unwrap()
-        .into_raw();
-    let mountpoint_c = unsafe { nix::libc::mkdtemp(template) };
-    let mountpoint = std::path::PathBuf::from(
-        unsafe { std::ffi::CStr::from_ptr(mountpoint_c) }
-            .to_string_lossy()
-            .to_string(),
-    );
-    mountpoint
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn mountpoint_creation() {
-        let mountpoint = mkdtemp_mountpoint();
-        assert!(!mountpoint.to_string_lossy().ends_with("XXXXXX"));
-        assert!(mountpoint.is_dir());
-    }
 }
