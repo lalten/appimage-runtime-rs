@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
-use std::ffi::OsString;
+use base62;
+use std::{ffi::OsString, hash::Hasher, io::Read};
 
 pub fn get_appimage_path() -> std::path::PathBuf {
     let path = std::env::var("TARGET_APPIMAGE").unwrap_or("/proc/self/exe".to_string());
@@ -55,8 +56,28 @@ pub fn consume_appimage_arg(args: &[OsString]) -> (Option<OsString>, &[OsString]
     (None, args)
 }
 
+pub fn get_hash(path: &std::path::PathBuf) -> Result<String> {
+    const BUFFER_LEN: usize = 1024 * 1024;
+    let mut buffer = [0u8; 1024 * 1024];
+
+    let mut reader = std::fs::File::open(path)?;
+    let mut hasher = seahash::SeaHasher::new();
+
+    loop {
+        let read_count = reader.read(&mut buffer)?;
+        hasher.write(&buffer[..read_count]);
+        if read_count != BUFFER_LEN {
+            break;
+        }
+    }
+
+    Ok(base62::encode(hasher.finish()))
+}
+
 #[cfg(test)]
 mod tests {
+    use std::io::Write;
+
     use super::*;
 
     #[test]
@@ -129,5 +150,20 @@ mod tests {
 
         assert!(arg1.is_none());
         assert_eq!(&args_out, &args_in.as_slice());
+    }
+
+    #[test]
+    fn get_hash_devnull() {
+        let devnull = std::path::PathBuf::from("/dev/null");
+        let hash = get_hash(&devnull).unwrap();
+        assert_eq!(hash, "HGbCilcGWPh");
+    }
+
+    #[test]
+    fn get_hash_file() {
+        let mut tempfile = tempfile::NamedTempFile::new().unwrap();
+        tempfile.write_all(b"Hello, World!").unwrap();
+        let hash = get_hash(&tempfile.path().to_path_buf()).unwrap();
+        assert_eq!(hash, "40tfDDpk1nx");
     }
 }

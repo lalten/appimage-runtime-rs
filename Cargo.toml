@@ -15,6 +15,7 @@ appimage-runtime = { path = "appimage-runtime" }
 appimage-mount = { path = "appimage-mount" }
 exec = "0.3.1"
 glob = "0.3.1"
+tempfile = "3.12.0"
 
 [dev-dependencies]
 backhand = "0.18.0"

@@ -1,6 +1,8 @@
 use appimage_mount::mount;
 use appimage_runtime::extract;
 use appimage_runtime::util;
+use appimage_runtime::util::get_hash;
+use tempfile::Builder;
 use std::path::PathBuf;
 use std::thread;
 
@@ -77,11 +79,23 @@ fn main() {
             .unwrap_or_else(|err| {
                 panic!("Failed to mount {appimage:?} at offset {fs_offset}: {err}")
             }),
-        Action::Extract | Action::ExtractAndRun => {
-            // TODO: make this a tempdir for extract-and-run
-            let target = &cwd.join("squashfs-root");
-            extract::extract_files(appimage, fs_offset, pattern.as_ref(), target).unwrap()
+        Action::ExtractAndRun => {
+            // TODO: Remove the tempdir when the program exits
+            let builder = Builder::new()
+                .prefix("appimage_extracted_")
+                .suffix(get_hash(appimage).unwrap().as_str())
+                .tempdir()
+                .unwrap()
+                .into_path();
+            extract::extract_files(appimage, fs_offset, pattern.as_ref(), &builder).unwrap()
         }
+        Action::Extract => extract::extract_files(
+            appimage,
+            fs_offset,
+            pattern.as_ref(),
+            &cwd.join("squashfs-root"),
+        )
+        .unwrap(),
         _ => unreachable!(),
     };
 

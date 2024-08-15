@@ -13,6 +13,9 @@ rust_library(
         "@crates//:backhand",
         "@crates//:elf",
         "@crates//:glob",
+        "@crates//:seahash",
+        "@crates//:tempfile",
+        "@crates//:base62",
     ],
 )
 

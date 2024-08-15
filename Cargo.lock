@@ -33,10 +33,13 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "backhand",
+ "base62",
  "elf",
  "fork",
  "glob",
  "runfiles",
+ "seahash",
+ "tempfile",
 ]
 
 [[package]]
@@ -60,6 +63,12 @@ dependencies = [
  "zstd",
  "zstd-safe",
 ]
+
+[[package]]
+name = "base62"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f879ef8fc74665ed7f0e6127cb106315888fc2744f68e14b74f83edbb2a08992"
 
 [[package]]
 name = "bitflags"
@@ -493,6 +502,12 @@ name = "rustversion"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "955d28af4278de8121b7ebeb796b6a45735dc01436d898801014aced2773a3d6"
+
+[[package]]
+name = "seahash"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c107b6f4780854c8b126e228ea8869f4d7b71260f962fefb57b996b8959ba6b"
 
 [[package]]
 name = "selecting"

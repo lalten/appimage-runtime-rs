@@ -21,5 +21,6 @@ rust_binary(
         "//appimage-runtime",
         "@crates//:exec",
         "@crates//:glob",
+        "@crates//:tempfile",
     ],
 )
