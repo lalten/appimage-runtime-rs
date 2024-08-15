@@ -1,6 +1,20 @@
-module(name="appimage-runtime")
+module(name = "appimage-runtime")
 
-bazel_dep(name = "rules_rust", version = "0.48.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.8.0")
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "rules_rust", version = "0.49.3")
+git_override(
+    module_name = "rules_rust",
+    remote = "https://github.com/bazelbuild/rules_rust",
+    commit = "bef8d2d4e709191a4d4beced8c2cbb748e35f516",
+    # https://github.com/bazelbuild/rules_rust/pull/2731
+    patches = ["//third_party:2731.diff"],
+    patch_strip = 1,
+)
+# local_path_override(
+#     module_name = "rules_rust",
+#     path = "../rules_rust",
+# )
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.from_cargo(
     name = "crates",
@@ -8,7 +22,17 @@ crate.from_cargo(
     manifests = ["//:Cargo.toml"],
 )
 use_repo(crate, "crates")
-
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.80.0"],
+    extra_target_triples = [
+        "aarch64-unknown-linux-musl",
+        "x86_64-unknown-linux-musl",
+    ],
+)
+use_repo(rust, "rust_toolchains")
 bazel_dep(name = "squashfuse", version = "0.5.2")
 
+bazel_dep(name = "toolchains_musl", version = "0.1.17")
 bazel_dep(name = "squashfs-tools", version = "4.6.1", dev_dependency = True)

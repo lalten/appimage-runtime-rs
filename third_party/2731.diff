@@ -1,0 +1,121 @@
+diff --git a/rust/extensions.bzl b/rust/extensions.bzl
+index 1a8b7793..668c9858 100644
+--- a/rust/extensions.bzl
++++ b/rust/extensions.bzl
+@@ -16,6 +16,8 @@ _RUST_TOOLCHAIN_VERSIONS = [
+     DEFAULT_NIGHTLY_VERSION,
+ ]
+ 
++_DEFAULT_STRING_LIST_PLACEHOLDER = ["RULES_RUST DEFAULT BECAUSE NONE IS NOT ALLOWED"]
++
+ def _find_modules(module_ctx):
+     root = None
+     our_module = None
+@@ -40,6 +42,9 @@ def _rust_impl(module_ctx):
+     toolchains = root.tags.toolchain or rules_rust.tags.toolchain
+ 
+     for toolchain in toolchains:
++        extra_target_triples = toolchain.extra_target_triples
++        if extra_target_triples == _DEFAULT_STRING_LIST_PLACEHOLDER:
++            extra_target_triples = None
+         rust_register_toolchains(
+             dev_components = toolchain.dev_components,
+             edition = toolchain.edition,
+@@ -47,7 +52,7 @@ def _rust_impl(module_ctx):
+             rustfmt_version = toolchain.rustfmt_version,
+             rust_analyzer_version = toolchain.rust_analyzer_version,
+             sha256s = toolchain.sha256s,
+-            extra_target_triples = toolchain.extra_target_triples,
++            extra_target_triples = extra_target_triples,
+             urls = toolchain.urls,
+             versions = toolchain.versions,
+             register_toolchains = False,
+@@ -84,7 +89,7 @@ _COMMON_TAG_KWARGS = dict(
+ _RUST_TOOLCHAIN_TAG = tag_class(
+     attrs = dict(
+         extra_target_triples = attr.string_list(
+-            default = DEFAULT_EXTRA_TARGET_TRIPLES,
++            default = _DEFAULT_STRING_LIST_PLACEHOLDER,
+         ),
+         rust_analyzer_version = attr.string(
+             doc = "The version of Rustc to pair with rust-analyzer.",
+diff --git a/rust/platform/triple_mappings.bzl b/rust/platform/triple_mappings.bzl
+index 567f1f84..c972af4d 100644
+--- a/rust/platform/triple_mappings.bzl
++++ b/rust/platform/triple_mappings.bzl
+@@ -29,6 +29,7 @@ SUPPORTED_T2_PLATFORM_TRIPLES = [
+     "aarch64-fuchsia",
+     "aarch64-linux-android",
+     "aarch64-pc-windows-msvc",
++    "aarch64-unknown-linux-musl",
+     "arm-unknown-linux-gnueabi",
+     "armv7-linux-androideabi",
+     "armv7-unknown-linux-gnueabi",
+@@ -46,6 +47,7 @@ SUPPORTED_T2_PLATFORM_TRIPLES = [
+     "x86_64-fuchsia",
+     "x86_64-linux-android",
+     "x86_64-unknown-freebsd",
++    "x86_64-unknown-linux-musl",
+     "x86_64-unknown-none",
+ ]
+ 
+diff --git a/rust/repositories.bzl b/rust/repositories.bzl
+index 88612310..2cff80bf 100644
+--- a/rust/repositories.bzl
++++ b/rust/repositories.bzl
+@@ -114,7 +114,7 @@ def rust_register_toolchains(
+         rustfmt_version = None,
+         rust_analyzer_version = None,
+         sha256s = None,
+-        extra_target_triples = DEFAULT_EXTRA_TARGET_TRIPLES,
++        extra_target_triples = None,
+         extra_rustc_flags = None,
+         extra_exec_rustc_flags = None,
+         urls = DEFAULT_STATIC_RUST_URL_TEMPLATES,
+@@ -201,13 +201,18 @@ def rust_register_toolchains(
+         ))
+ 
+     for exec_triple, name in DEFAULT_TOOLCHAIN_TRIPLES.items():
++        if extra_target_triples == None:
++            specific_extra_target_triples = [exec_triple] + DEFAULT_EXTRA_TARGET_TRIPLES
++        else:
++            specific_extra_target_triples = extra_target_triples
++
+         maybe(
+             rust_repository_set,
+             name = name,
+             dev_components = dev_components,
+             edition = edition,
+             exec_triple = exec_triple,
+-            extra_target_triples = extra_target_triples,
++            extra_target_triples = specific_extra_target_triples,
+             allocator_library = allocator_library,
+             global_allocator_library = global_allocator_library,
+             register_toolchain = register_toolchains,
+@@ -926,7 +931,10 @@ rust_toolchain_set_repository = repository_rule(
+ def _get_toolchain_repositories(name, exec_triple, extra_target_triples, versions):
+     toolchain_repos = []
+ 
+-    for target_triple in depset([exec_triple] + extra_target_triples).to_list():
++    target_triples = depset(extra_target_triples).to_list()
++    if not target_triples:
++        target_triples = [exec_triple]
++    for target_triple in target_triples:
+         # Parse all provided versions while checking for duplicates
+         channels = {}
+         for version in versions:
+@@ -1020,11 +1028,11 @@ def rust_repository_set(
+     all_toolchain_names = []
+     for toolchain in _get_toolchain_repositories(name, exec_triple, extra_target_triples_list, versions):
+         target_compatible_with = None
+-        if toolchain.target_triple == exec_triple:
++        if type(extra_target_triples) == "dict":
++            target_compatible_with = extra_target_triples.get(toolchain.target_triple)
++        elif toolchain.target_triple == exec_triple:
+             # The exec triple implicitly gets a toolchain with itself as a target - use default_target_compatible_with for it
+             target_compatible_with = default_target_compatible_with
+-        elif type(extra_target_triples) == "dict":
+-            target_compatible_with = extra_target_triples.get(toolchain.target_triple)
+ 
+         # Infer toolchain-specific rustc flags depending on the type (list, dict, optional) of extra_rustc_flags
+         if extra_rustc_flags == None:
