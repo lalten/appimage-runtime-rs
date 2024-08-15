@@ -19,6 +19,7 @@ pub fn squashfuse_mount(
         .arg(format!("-ooffset={fs_offset}"))
         .arg(format!("-onotify_pipe={}", &notify_pipe.to_string_lossy()))
         .arg("-oauto_unmount")
+        .arg("-otimeout=1")
         .arg(squashfs)
         .arg(&mountpoint)
         .stdout(memfd_exec::Stdio::piped())

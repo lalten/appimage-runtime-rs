@@ -7,14 +7,17 @@ coproc mount_proc { exec "$TEST_APPIMAGE" --appimage-mount; }
 pid="$mount_proc_PID"
 read -r mount <&"${mount_proc[0]}"
 
-# Check that the mount point is OK
+# Check that the mount is OK
+test -n "$(mount --types fuse.squashfuse)"
 test "$(cat "$mount"/other/path/file.txt)" == "I am data"
 
+# The application is waiting to be SIGINTed
 kill -SIGINT "$pid"
 wait "$pid" || true
 
-# Check that the mount point is gone
-#TODO: fix
-# test ! -d "$mount"
+# Wait >= the timeout value passed to squashfuse
+tail --pid="$(pgrep -f squashfuse)" -f /dev/null
 
-# TODO: check that we don't leave any squashfuse processes behind
+# Check that the mount is gone
+test -z "$( ls -A "$mount" )"
+test -z "$(mount --types fuse.squashfuse)"

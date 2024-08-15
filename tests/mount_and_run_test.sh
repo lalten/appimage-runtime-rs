@@ -11,7 +11,9 @@ grep -q "APPIMAGE=$(readlink -f "$TEST_APPIMAGE")" "$out"
 grep -q "ARGV0=$TEST_APPIMAGE" "$out"
 grep -q "OWD=$(pwd)" "$out"
 
-# Check that the mount point is gone after execution is finished
-test ! -d "$TMPDIR/.mount_"
+# Check that we don't leave any squashfuse daemon behind
+tail --pid="$(pgrep -f squashfuse)" -f /dev/null
 
-# TODO: check that we don't leave any squashfuse processes behind
+# Check that the mount is gone after execution is finished
+test ! -d "$TMPDIR/.mount_"
+test -z "$(mount --types fuse.squashfuse)"
