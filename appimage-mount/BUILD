@@ -10,6 +10,7 @@ rust_library(
     rustc_env = {"COMPILE_DATA_PATH": "$(execpath @squashfuse//:ll_main)"},
     visibility = ["//visibility:public"],
     deps = [
+        "@crates//:anyhow",
         "@crates//:memfd-exec",
         "@crates//:nix",
         "@crates//:selecting",

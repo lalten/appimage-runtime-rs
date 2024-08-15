@@ -1,49 +1,4 @@
-use std::fmt;
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum SquashfuseErrorKind {
-    Errno,
-    Io,
-    Process,
-    NotifyPipe,
-}
-
-#[derive(Debug)]
-pub struct SquashfuseError {
-    kind: SquashfuseErrorKind,
-    message: String,
-}
-
-impl fmt::Display for SquashfuseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{kind:?}: {message}",
-            kind = self.kind,
-            message = self.message
-        )
-    }
-}
-
-impl From<std::io::Error> for SquashfuseError {
-    fn from(error: std::io::Error) -> Self {
-        SquashfuseError {
-            kind: SquashfuseErrorKind::Io,
-            message: error.to_string(),
-        }
-    }
-}
-
-impl From<nix::errno::Errno> for SquashfuseError {
-    fn from(error: nix::errno::Errno) -> Self {
-        SquashfuseError {
-            kind: SquashfuseErrorKind::Errno,
-            message: error.to_string(),
-        }
-    }
-}
-
-type Result<T> = std::result::Result<T, SquashfuseError>;
+use anyhow::{bail, Result};
 
 pub const SQUASHFUSE_DATA: &[u8] = include_bytes!(std::env!("COMPILE_DATA_PATH"));
 
@@ -80,10 +35,7 @@ pub fn squashfuse_mount(
         .is_read(&notify_pipe_file)
     {
         if let Some(status) = &mut squashfuse_child.try_wait()? {
-            return Err(SquashfuseError {
-                kind: SquashfuseErrorKind::Process,
-                message: format!("{prog:?} exited with status {status:?}").to_string(),
-            });
+            bail!("{prog:?} exited with status {status:?}");
         }
     }
 
@@ -93,11 +45,7 @@ pub fn squashfuse_mount(
     notify_pipe_file.read_to_string(&mut squashfuse_status)?;
     if squashfuse_status != "s" {
         let output = squashfuse_child.wait_with_output()?;
-        return Err(SquashfuseError {
-            kind: SquashfuseErrorKind::NotifyPipe,
-            message: format!("{prog:?} notify-piped {squashfuse_status:?}:. {output:?}")
-                .to_string(),
-        });
+        bail!("{prog:?} notify-piped {squashfuse_status:?}:. {output:?}");
     }
 
     // squashfuse has daemonized at this point.
