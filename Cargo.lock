@@ -40,6 +40,7 @@ dependencies = [
  "runfiles",
  "seahash",
  "tempfile",
+ "waitpid-any",
 ]
 
 [[package]]
@@ -627,6 +628,16 @@ name = "unicode-ident"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
+
+[[package]]
+name = "waitpid-any"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0189157c93c54d86e5c61ddf0c1223baa25e5bfb2f6f9983c678985b028d7c12"
+dependencies = [
+ "rustix",
+ "windows-sys 0.52.0",
+]
 
 [[package]]
 name = "winapi"

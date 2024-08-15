@@ -32,7 +32,6 @@ test "$(stat --format=%Y squashfs-root/other/path/file.txt)" == "$SOURCE_DATE_EP
 rm -rf squashfs-root
 "$TEST_APPIMAGE" --appimage-extract "*.txt"
 test "$(find squashfs-root -type f)" == "squashfs-root/other/path/file.txt"
-
 rm -rf squashfs-root
 "$TEST_APPIMAGE" --appimage-extract "**/*Run"
 test "$(find squashfs-root -type f)" == "squashfs-root/AppRun"

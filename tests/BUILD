@@ -6,6 +6,7 @@ genrule(
         "#!/bin/sh",
         'echo args: "$$@"',
         "env | sort",
+        "ps -fauxw",
         "EOF",
         "chmod +x AppRun",
         "mkdir -p other/path",

@@ -1,5 +1,7 @@
 use anyhow::{Context, Result};
 use base62;
+use fork;
+use waitpid_any;
 use std::{ffi::OsString, hash::Hasher, io::Read, path::PathBuf};
 
 pub fn get_appimage_path() -> PathBuf {
@@ -78,6 +80,20 @@ pub fn make_hashed_tempdirname<S: Into<String>>(appimage: &PathBuf, prefix: S) -
     let hash = get_hash(appimage)?;
     let tempdir = std::env::temp_dir();
     Ok(tempdir.join(prefix.into() + &hash))
+}
+
+pub fn remove_when_done(tempdir: &PathBuf) -> Result<()> {
+    let parent_pid = std::process::id() as i32;
+    match fork::fork() {
+        Ok(fork::Fork::Parent(_)) => (),
+        Ok(fork::Fork::Child) => {
+            waitpid_any::WaitHandle::open(parent_pid)?.wait()?;
+            std::fs::remove_dir_all(tempdir)?;
+            std::process::exit(0);
+        }
+        Err(_) => panic!("Failed to fork"),
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -178,6 +194,6 @@ mod tests {
         let devnull = std::path::PathBuf::from("/dev/null");
         let tempdir = make_hashed_tempdirname(&devnull, "test_").unwrap();
         assert_eq!(tempdir.to_string_lossy(), "/tmp/test_HGbCilcGWPh");
-        assert!(! tempdir.exists());
+        assert!(!tempdir.exists());
     }
 }

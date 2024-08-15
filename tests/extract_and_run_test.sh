@@ -10,3 +10,6 @@ grep -q -E "APPDIR=$TMPDIR/appimage_extracted_[0-9a-zA-Z]+" "$out"
 grep -q "APPIMAGE=$(readlink -f "$TEST_APPIMAGE")" "$out"
 grep -q "ARGV0=$TEST_APPIMAGE" "$out"
 grep -q "OWD=$(pwd)" "$out"
+
+# Check that the extracted AppDir is removed on exit
+test ! -d "$TMPDIR/appimage_extracted_"*

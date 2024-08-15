@@ -11,11 +11,13 @@ rust_library(
     deps = [
         "@crates//:anyhow",
         "@crates//:backhand",
+        "@crates//:base62",
         "@crates//:elf",
+        "@crates//:fork",
         "@crates//:glob",
         "@crates//:seahash",
         "@crates//:tempfile",
-        "@crates//:base62",
+        "@crates//:waitpid-any",
     ],
 )
 

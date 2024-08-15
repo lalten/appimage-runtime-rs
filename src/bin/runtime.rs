@@ -82,8 +82,8 @@ fn main() {
                 .to_owned()
         }
         Action::ExtractAndRun => {
-            // TODO: Remove the tempdir when the program exits
             let tmpdir = util::make_hashed_tempdirname(appimage, "appimage_extracted_").unwrap();
+            util::remove_when_done(&tmpdir).unwrap();
             extract::extract_files(appimage, fs_offset, pattern.as_ref(), &tmpdir)
                 .unwrap()
                 .to_owned()
