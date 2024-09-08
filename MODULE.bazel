@@ -6,15 +6,8 @@ bazel_dep(name = "rules_rust", version = "0.49.3")
 git_override(
     module_name = "rules_rust",
     remote = "https://github.com/bazelbuild/rules_rust",
-    commit = "bef8d2d4e709191a4d4beced8c2cbb748e35f516",
-    # https://github.com/bazelbuild/rules_rust/pull/2731
-    patches = ["//third_party:2731.diff"],
-    patch_strip = 1,
+    commit = "3d1856b6b6153056b4d2938557b4fbbe5214c554", # HEAD of main as of 2024-09-08
 )
-# local_path_override(
-#     module_name = "rules_rust",
-#     path = "../rules_rust",
-# )
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.from_cargo(
     name = "crates",
