@@ -1,6 +1,9 @@
-module(name="appimage-runtime")
+module(name = "appimage-runtime")
 
-bazel_dep(name = "rules_rust", version = "0.48.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.8.0")
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "rules_rust", version = "0.51.0")
+
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.from_cargo(
     name = "crates",
@@ -9,6 +12,18 @@ crate.from_cargo(
 )
 use_repo(crate, "crates")
 
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    extra_target_triples = [
+        "aarch64-unknown-linux-musl",
+        "x86_64-unknown-linux-musl",
+    ],
+    versions = ["1.81.0"],
+)
+use_repo(rust, "rust_toolchains")
+
 bazel_dep(name = "squashfuse", version = "0.5.2")
+bazel_dep(name = "toolchains_musl", version = "0.1.20")
 
 bazel_dep(name = "squashfs-tools", version = "4.6.1", dev_dependency = True)
