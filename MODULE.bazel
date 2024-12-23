@@ -1,8 +1,8 @@
 module(name = "appimage-runtime")
 
-bazel_dep(name = "aspect_bazel_lib", version = "2.8.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.10.0")
 bazel_dep(name = "platforms", version = "0.0.10")
-bazel_dep(name = "rules_rust", version = "0.51.0")
+bazel_dep(name = "rules_rust", version = "0.56.0")
 
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.from_cargo(
@@ -19,7 +19,7 @@ rust.toolchain(
         "aarch64-unknown-linux-musl",
         "x86_64-unknown-linux-musl",
     ],
-    versions = ["1.81.0"],
+    versions = ["1.83.0"],
 )
 use_repo(rust, "rust_toolchains")
 
